@@ -17,7 +17,7 @@ ABD_Projectile::ABD_Projectile()
 	bHasExploded = false;
 	Velocity = FVector::ZeroVector;
 	ExplosionDelayTime = 3.0f;
-	ExplosionRadius = 200.0f;
+	ExplosionRadius = 400.0f;
 	BaseDamage = 50.0f;
 }
 
