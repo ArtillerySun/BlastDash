@@ -34,6 +34,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
 	float ExplosionUpwardBias = 500.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
+	bool bIsActivated = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	FVector Velocity; // Velocity
 
@@ -65,4 +68,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void ApplyCustomImpulse_Implementation(FVector Impulse, bool bVelocityChange) override;
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void ActivateBomb();
 };

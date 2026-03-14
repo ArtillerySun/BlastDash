@@ -39,9 +39,11 @@ void ABD_Projectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TimeElapsed += DeltaTime;
-	if (TimeElapsed >= ExplosionDelayTime) {
-		ExecuteExplosion();
+	if (bIsActivated) {
+		TimeElapsed += DeltaTime;
+		if (TimeElapsed >= ExplosionDelayTime) {
+			ExecuteExplosion();
+		}
 	}
 
 	UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent());
@@ -209,4 +211,10 @@ void ABD_Projectile::ApplyCustomImpulse_Implementation(FVector Impulse, bool bVe
 	} else {
 		Velocity = Impulse / FMath::Max(Mass, 0.1f);
 	}
+}
+
+void ABD_Projectile::ActivateBomb()
+{
+	bIsActivated = true;
+	// Can add more relative logics
 }
