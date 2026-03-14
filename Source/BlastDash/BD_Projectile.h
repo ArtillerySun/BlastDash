@@ -7,6 +7,8 @@
 #include "BD_PhysicsInteractable.h"
 #include "BD_Projectile.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBombPickedUpSignature);
+
 UCLASS()
 class BLASTDASH_API ABD_Projectile : public AActor, public IBD_PhysicsInteractable
 {
@@ -56,6 +58,14 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
 	void OnExplosionEffects();
 
+	UPROPERTY(BlueprintAssignable, Category = "BlastDash|Events")
+	FOnBombPickedUpSignature OnBombPickedUp;
+
+	// Hovering
+	bool bIsHovering = false;
+	FVector HoverAnchorLocation;
+	float HoverSineTime = 0.0f;
+
 	float TimeElapsed = 0.0f;
 	bool bHasExploded = false;
 
@@ -71,4 +81,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void ActivateBomb();
+
+	// Hovering
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void SetHoverState(bool bHover, FVector AnchorLoc = FVector::ZeroVector);
 };
