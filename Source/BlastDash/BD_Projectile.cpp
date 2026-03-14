@@ -34,20 +34,49 @@ void ABD_Projectile::BeginPlay()
 	}
 }
 
+void ABD_Projectile::SetHoverState(bool bHover, FVector AnchorLoc)
+{
+	bIsHovering = bHover;
+	HoverAnchorLocation = AnchorLoc;
+	HoverSineTime = 0.0f;     // Reset
+	Velocity = FVector::ZeroVector;
+}
+
 // Called every frame
 void ABD_Projectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TimeElapsed += DeltaTime;
-	if (TimeElapsed >= ExplosionDelayTime) {
-		ExecuteExplosion();
+	if (bIsActivated) {
+		TimeElapsed += DeltaTime;
+		if (TimeElapsed >= ExplosionDelayTime) {
+			ExecuteExplosion();
+		}
 	}
 
 	UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent());
 	if (RootPrim && RootPrim->IsSimulatingPhysics())
 	{
+		if (bIsHovering)
+		{
+			bIsHovering = false; // End Hovering
+			OnBombPickedUp.Broadcast();
+		}
+
 		Velocity = RootPrim->GetComponentVelocity();
+		return;
+	}
+
+	if (bIsHovering)
+	{
+		HoverSineTime += DeltaTime;
+
+		// Use sin() to simulate hovering
+		float ZOffset = FMath::Sin(HoverSineTime * 3.0f) * 10.0f;
+
+		FVector NewLocation = HoverAnchorLocation + FVector(0, 0, ZOffset);
+		SetActorLocation(NewLocation);
+
 		return;
 	}
 
@@ -209,4 +238,10 @@ void ABD_Projectile::ApplyCustomImpulse_Implementation(FVector Impulse, bool bVe
 	} else {
 		Velocity = Impulse / FMath::Max(Mass, 0.1f);
 	}
+}
+
+void ABD_Projectile::ActivateBomb()
+{
+	bIsActivated = true;
+	// Can add more relative logics
 }
