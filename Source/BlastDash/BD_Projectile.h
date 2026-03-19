@@ -90,5 +90,5 @@ public:
 	float GetExplosionDelayTime();
 
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
-	void SetExplosionDelayTime(float NewExplosionDelayTime);
+	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
 };
