@@ -42,6 +42,16 @@ void ABD_Projectile::SetHoverState(bool bHover, FVector AnchorLoc)
 	Velocity = FVector::ZeroVector;
 }
 
+float ABD_Projectile::GetExplosionDelayTime()
+{
+	return ExplosionDelayTime;
+}
+
+void ABD_Projectile::SetExplosionDelayTime(float NewExplosionDelayTime)
+{
+	ExplosionDelayTime = NewExplosionDelayTime;
+}
+
 // Called every frame
 void ABD_Projectile::Tick(float DeltaTime)
 {
