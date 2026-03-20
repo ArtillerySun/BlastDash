@@ -7,6 +7,8 @@
 #include "BD_PhysicsInteractable.h"
 #include "BD_Projectile.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBombPickedUpSignature);
+
 UCLASS()
 class BLASTDASH_API ABD_Projectile : public AActor, public IBD_PhysicsInteractable
 {
@@ -25,7 +27,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	float ExplosionForce = 50000.f;
 
-	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
 	float ExplosionDelayTime = 3.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
@@ -33,6 +35,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
 	float ExplosionUpwardBias = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
+	bool bIsActivated = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	FVector Velocity; // Velocity
@@ -53,6 +58,14 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
 	void OnExplosionEffects();
 
+	UPROPERTY(BlueprintAssignable, Category = "BlastDash|Events")
+	FOnBombPickedUpSignature OnBombPickedUp;
+
+	// Hovering
+	bool bIsHovering = false;
+	FVector HoverAnchorLocation;
+	float HoverSineTime = 0.0f;
+
 	float TimeElapsed = 0.0f;
 	bool bHasExploded = false;
 
@@ -65,4 +78,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void ApplyCustomImpulse_Implementation(FVector Impulse, bool bVelocityChange) override;
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void ActivateBomb();
+
+	// Hovering
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void SetHoverState(bool bHover, FVector AnchorLoc = FVector::ZeroVector);
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	float GetExplosionDelayTime();
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
 };
