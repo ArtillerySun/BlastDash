@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "BD_Projectile.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,7 +10,7 @@
 // Sets default values
 ABD_Projectile::ABD_Projectile()
 {
-	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	TimeElapsed = 0.0f;
@@ -33,34 +34,71 @@ void ABD_Projectile::BeginPlay()
 	}
 }
 
+void ABD_Projectile::SetHoverState(bool bHover, FVector AnchorLoc)
+{
+	bIsHovering = bHover;
+	HoverAnchorLocation = AnchorLoc;
+	HoverSineTime = 0.0f;     // Reset
+	Velocity = FVector::ZeroVector;
+}
+
+float ABD_Projectile::GetExplosionDelayTime()
+{
+	return ExplosionDelayTime;
+}
+
+void ABD_Projectile::SetExplosionDelayTime(float NewExplosionDelayTime)
+{
+	ExplosionDelayTime = NewExplosionDelayTime;
+}
+
 // Called every frame
 void ABD_Projectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TimeElapsed += DeltaTime;
-	if (TimeElapsed >= ExplosionDelayTime)
-	{
-		ExecuteExplosion();
-		return;
+	if (bIsActivated) {
+		TimeElapsed += DeltaTime;
+		if (TimeElapsed >= ExplosionDelayTime) {
+			ExecuteExplosion();
+		}
 	}
 
 	UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent());
 	if (RootPrim && RootPrim->IsSimulatingPhysics())
 	{
+		if (bIsHovering)
+		{
+			bIsHovering = false; // End Hovering
+			OnBombPickedUp.Broadcast();
+		}
+
 		Velocity = RootPrim->GetComponentVelocity();
+		return;
+	}
+
+	if (bIsHovering)
+	{
+		HoverSineTime += DeltaTime;
+
+		// Use sin() to simulate hovering
+		float ZOffset = FMath::Sin(HoverSineTime * 3.0f) * 10.0f;
+
+		FVector NewLocation = HoverAnchorLocation + FVector(0, 0, ZOffset);
+		SetActorLocation(NewLocation);
+
 		return;
 	}
 
 	FVector Acceleration = Gravity;
 
-	// Update velocity
+	// Update Velocity
 	Velocity += Acceleration * DeltaTime;
 
-	// Apply drag force
+	// Apply Drag force
 	Velocity *= (1.0f - DragForce * DeltaTime);
 
-	// Collision detection
+	// Collision Detection
 	FVector CurrentLocation = GetActorLocation();
 	FVector NextLocation = CurrentLocation + (Velocity * DeltaTime);
 
@@ -85,31 +123,28 @@ void ABD_Projectile::Tick(float DeltaTime)
 		QueryParams
 	);
 
-	if (bHit)
-	{
+	if (bHit) {
 		HandleCollision(HitResult);
 	}
-	else
-	{
+	else {
 		SetActorLocation(NextLocation);
 	}
 }
 
-void ABD_Projectile::HandleCollision(const FHitResult& Hit)
-{
-	// V_new = V_old - 2 * (V_old dot Normal) * Normal
+void ABD_Projectile::HandleCollision(const FHitResult& Hit) {
+	// V_new = V_old - 2 * (V_old \dot Normal) * Normal
 	FVector Normal = Hit.Normal;
 	Velocity = Velocity - 2 * FVector::DotProduct(Velocity, Normal) * Normal;
 
-	// Apply damping factor
+	// Apply Damping Factor
 	Velocity *= DampingFactor;
 
-	// Prevent sticking in the wall
+	// Prevent Stucking in the Wall
 	SetActorLocation(Hit.Location + Normal * 2.0f);
 }
 
-void ABD_Projectile::ExecuteExplosion()
-{
+void ABD_Projectile::ExecuteExplosion() {
+
 	SetActorTickEnabled(false);
 
 	if (bHasExploded) return;
@@ -137,54 +172,31 @@ void ABD_Projectile::ExecuteExplosion()
 		QueryParams
 	);
 
-	if (bHasHurtSomething)
-	{
+	if (bHasHurtSomething) {
 		for (auto& Result : Overlaps)
 		{
 			AActor* HitActor = Result.GetActor();
-			if (!HitActor || HitActor == this) continue;
+			if (!HitActor) continue;
 
-			// Reliable direct damage for breakable props / large actors
-			if (HitActor->ActorHasTag(TEXT("Breakable")))
-			{
-				UGameplayStatics::ApplyDamage(
-					HitActor,
-					BaseDamage,
-					GetInstigatorController(),
-					this,
-					UDamageType::StaticClass()
-				);
-			}
-
-			// Physics knockback
+			// 1. Physics Knockback
 			FVector Direction = HitActor->GetActorLocation() - GetActorLocation();
 			float Distance = Direction.Size();
+			Direction.Normalize();
 
-			if (Distance > KINDA_SMALL_NUMBER)
-			{
-				Direction.Normalize();
-			}
-			else
-			{
-				Direction = FVector::UpVector;
-				Distance = 0.f;
-			}
-
-			// Calculate strength decay
+			// Calculate Strength Decay
 			float Strength = (1.0f - FMath::Clamp(Distance / ExplosionRadius, 0.f, 1.f)) * ExplosionForce;
 
-			// Make the character fly
+			// Make the Charactor Fly
 			FVector FinalImpulse = Direction * Strength + FVector(0, 0, ExplosionUpwardBias);
 
-			// Apply force to characters
+			// Apply Force to Charactors
 			ACharacter* Character = Cast<ACharacter>(HitActor);
 			if (Character)
 			{
 				Character->LaunchCharacter(FinalImpulse, true, true);
 			}
-			else
-			{
-				// Only for objects with Simulate Physics enabled
+			else  {
+				// Only for Objects with Simulate Physics Enabled
 				USceneComponent* Root = HitActor->GetRootComponent();
 				if (Root)
 				{
@@ -196,49 +208,50 @@ void ABD_Projectile::ExecuteExplosion()
 				}
 			}
 		}
+
+		// 2. Deal with Damage
+		FVector DamageOrigin = GetActorLocation() + FVector(0.f, 0.f, 20.f);
+		UGameplayStatics::ApplyRadialDamage(
+			this,
+			BaseDamage,
+			DamageOrigin,
+			ExplosionRadius,
+			UDamageType::StaticClass(),
+			IgnoreActors,
+			this,
+			GetInstigatorController(),
+			false,
+			ECC_WorldDynamic
+		);
 	}
-
-	// Radial damage for player / normal actors with falloff-style blast behavior
-	FVector DamageOrigin = GetActorLocation() + FVector(0.f, 0.f, 20.f);
-	UGameplayStatics::ApplyRadialDamage(
-		this,
-		BaseDamage,
-		DamageOrigin,
-		ExplosionRadius,
-		UDamageType::StaticClass(),
-		IgnoreActors,
-		this,
-		GetInstigatorController(),
-		false,
-		ECC_Visibility
-	);
-
-	// Debug information for now
+	
+	// Debug Information for Now
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 2.0f, 0, 1.5f);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius / 2.0f, 32, FColor::Yellow, false, 2.0f, 0, 1.5f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius / 2.0, 32, FColor::Yellow, false, 2.0f, 0, 1.5f);
 
 	OnSelfDestroy();
 }
 
-void ABD_Projectile::OnSelfDestroy()
-{
+void ABD_Projectile::OnSelfDestroy() {
 	this->Destroy();
 }
 
 void ABD_Projectile::ApplyCustomImpulse_Implementation(FVector Impulse, bool bVelocityChange)
 {
-	// Release physics engine
-	if (UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent()))
-	{
+	// Release Physics Engine
+	if (UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent())) {
 		RootPrim->SetSimulatePhysics(false);
 	}
 
-	if (bVelocityChange)
-	{
+	if (bVelocityChange) {
 		Velocity = Impulse;
-	}
-	else
-	{
+	} else {
 		Velocity = Impulse / FMath::Max(Mass, 0.1f);
 	}
+}
+
+void ABD_Projectile::ActivateBomb()
+{
+	bIsActivated = true;
+	// Can add more relative logics
 }
