@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	float ExplosionForce = 50000.f;
 
-	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
 	float ExplosionDelayTime = 3.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BlastDash|Logic")
@@ -85,4 +85,10 @@ public:
 	// Hovering
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void SetHoverState(bool bHover, FVector AnchorLoc = FVector::ZeroVector);
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	float GetExplosionDelayTime();
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
 };
