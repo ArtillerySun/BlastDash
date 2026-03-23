@@ -42,6 +42,9 @@ ABlastDashCharacter::ABlastDashCharacter()
 	// Configure character movement
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
+
+	GetCharacterMovement()->MaxWalkSpeed = 900.0f;
+	GetCharacterMovement()->JumpZVelocity = 750.0f;
 }
 
 void ABlastDashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
