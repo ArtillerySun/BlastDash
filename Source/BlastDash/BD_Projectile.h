@@ -91,4 +91,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
+
+	// Premature detonation
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void TriggerEarlyDetonation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
+	float MinDetonationAge = 0.3f; // In second
+
+	// Track the last player who picked up the bomb
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
+	AActor* ProjectileOwner;
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	void SetProjectileOwner(AActor* NewOwner) { ProjectileOwner = NewOwner; }
 };

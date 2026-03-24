@@ -31,6 +31,9 @@ void ABD_Projectile::BeginPlay()
 		RootPrim->SetCollisionObjectType(ECC_PhysicsBody);
 		RootPrim->SetSimulatePhysics(false);
 		RootPrim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		// Block other bombs
+		RootPrim->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Block);
 	}
 }
 
@@ -176,7 +179,7 @@ void ABD_Projectile::ExecuteExplosion() {
 		for (auto& Result : Overlaps)
 		{
 			AActor* HitActor = Result.GetActor();
-			if (!HitActor) continue;
+			if (!HitActor || HitActor == this) continue;
 
 			// Breakable tag check
 			if (HitActor->ActorHasTag(FName("Breakable")))
@@ -198,16 +201,27 @@ void ABD_Projectile::ExecuteExplosion() {
 			// Calculate Strength Decay
 			float Strength = (1.0f - FMath::Clamp(Distance / ExplosionRadius, 0.f, 1.f)) * ExplosionForce;
 
+			//if (ProjectileOwner && HitActor == ProjectileOwner)
+			//{
+			//	Strength *= 0.3f; // now the owner will only get 30% damage and 30% impulse
+			//}
+
 			// Make the Charactor Fly
 			FVector FinalImpulse = Direction * Strength + FVector(0, 0, ExplosionUpwardBias);
 
-			// Apply Force to Charactors
-			ACharacter* Character = Cast<ACharacter>(HitActor);
-			if (Character)
+
+			if (HitActor->GetClass()->ImplementsInterface(UBD_PhysicsInteractable::StaticClass()))
 			{
-				Character->LaunchCharacter(FinalImpulse, true, true);
+				// If it is a custom bomb
+				IBD_PhysicsInteractable::Execute_ApplyCustomImpulse(HitActor, FinalImpulse, false);
 			}
-			else  {
+			else if (ACharacter *Character = Cast<ACharacter>(HitActor))
+			{
+				// Apply Force to Charactors
+				Character->LaunchCharacter(FinalImpulse, true, true);
+			} 
+			else 
+			{
 				// Only for Objects with Simulate Physics Enabled
 				USceneComponent* Root = HitActor->GetRootComponent();
 				if (Root)
@@ -271,4 +285,16 @@ void ABD_Projectile::ActivateBomb()
 {
 	bIsActivated = true;
 	// Can add more relative logics
+}
+
+void ABD_Projectile::TriggerEarlyDetonation()
+{
+	if (bHasExploded) return;
+
+	if (!bIsActivated)
+	{
+		ActivateBomb();
+		ExplosionDelayTime = TimeElapsed + 0.5f;
+		return;
+	}
 }
