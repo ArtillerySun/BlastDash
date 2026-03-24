@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BD_PhysicsInteractable.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "BD_Projectile.generated.h"
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBombPickedUpSignature);
 
@@ -70,6 +72,9 @@ protected:
 
 	float TimeElapsed = 0.0f;
 	bool bHasExploded = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 public:	
 

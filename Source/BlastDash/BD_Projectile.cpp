@@ -6,11 +6,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/DamageEvents.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 ABD_Projectile::ABD_Projectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	TimeElapsed = 0.0f;
@@ -19,8 +19,10 @@ ABD_Projectile::ABD_Projectile()
 	ExplosionDelayTime = 3.0f;
 	ExplosionRadius = 400.0f;
 	BaseDamage = 50.0f;
-}
 
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+	StimuliSource->bAutoRegister = true;
+}
 // Called when the game starts or when spawned
 void ABD_Projectile::BeginPlay()
 {
@@ -31,6 +33,12 @@ void ABD_Projectile::BeginPlay()
 		RootPrim->SetCollisionObjectType(ECC_PhysicsBody);
 		RootPrim->SetSimulatePhysics(false);
 		RootPrim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+
+	if (StimuliSource)
+	{
+		StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+		StimuliSource->RegisterWithPerceptionSystem();
 	}
 }
 
@@ -48,6 +56,14 @@ void ABD_Projectile::SetHeld(bool bHeld)
 
 		// Broadcast pickup event
 		OnBombPickedUp.Broadcast();
+	}
+	else
+	{
+		if (StimuliSource)
+		{
+			StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+			StimuliSource->RegisterWithPerceptionSystem();
+		}
 	}
 }
 
