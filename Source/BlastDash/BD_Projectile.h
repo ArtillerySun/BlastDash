@@ -54,6 +54,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	FVector Gravity = FVector(0.f, 0.f, -980.f); // Gravity
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "BlastDash|State")
+	bool bIsHeld = false;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
 	void OnExplosionEffects();
@@ -91,4 +93,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
+
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|State")
+	void SetHeld(bool bHeld);
+
+	UFUNCTION(BlueprintPure, Category = "BlastDash|State")
+	bool IsHeld() const { return bIsHeld; }
 };

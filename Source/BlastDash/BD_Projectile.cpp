@@ -34,6 +34,24 @@ void ABD_Projectile::BeginPlay()
 	}
 }
 
+void ABD_Projectile::SetHeld(bool bHeld)
+{
+	bIsHeld = bHeld;
+
+	if (bIsHeld)
+	{
+		// Stop hovering immediately
+		bIsHovering = false;
+
+		// Reset velocity
+		Velocity = FVector::ZeroVector;
+
+		// Broadcast pickup event
+		OnBombPickedUp.Broadcast();
+	}
+}
+
+
 void ABD_Projectile::SetHoverState(bool bHover, FVector AnchorLoc)
 {
 	bIsHovering = bHover;
