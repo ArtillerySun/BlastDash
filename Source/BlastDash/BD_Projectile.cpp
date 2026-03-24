@@ -196,6 +196,18 @@ void ABD_Projectile::ExecuteExplosion() {
 			AActor* HitActor = Result.GetActor();
 			if (!HitActor) continue;
 
+			// Breakable tag check
+			if (HitActor->ActorHasTag(FName("Breakable")))
+			{
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					BaseDamage,
+					GetInstigatorController(),
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+
 			// 1. Physics Knockback
 			FVector Direction = HitActor->GetActorLocation() - GetActorLocation();
 			float Distance = Direction.Size();
@@ -256,16 +268,21 @@ void ABD_Projectile::OnSelfDestroy() {
 
 void ABD_Projectile::ApplyCustomImpulse_Implementation(FVector Impulse, bool bVelocityChange)
 {
-	// Release Physics Engine
-	if (UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent())) {
+	if (UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(GetRootComponent()))
+	{
 		RootPrim->SetSimulatePhysics(false);
 	}
 
-	if (bVelocityChange) {
+	if (bVelocityChange)
+	{
 		Velocity = Impulse;
-	} else {
+	}
+	else
+	{
 		Velocity = Impulse / FMath::Max(Mass, 0.1f);
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Velocity AFTER = %s"), *Velocity.ToString());
 }
 
 void ABD_Projectile::ActivateBomb()
