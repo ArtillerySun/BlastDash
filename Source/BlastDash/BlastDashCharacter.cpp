@@ -41,7 +41,7 @@ ABlastDashCharacter::ABlastDashCharacter()
 
 	// Configure character movement
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
-	GetCharacterMovement()->AirControl = 0.5f;
+	GetCharacterMovement()->AirControl = 0.75f;
 
 	GetCharacterMovement()->MaxWalkSpeed = 900.0f;
 	GetCharacterMovement()->JumpZVelocity = 750.0f;
