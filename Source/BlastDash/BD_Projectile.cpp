@@ -201,6 +201,11 @@ void ABD_Projectile::ExecuteExplosion() {
 			// Calculate Strength Decay
 			float Strength = (1.0f - FMath::Clamp(Distance / ExplosionRadius, 0.f, 1.f)) * ExplosionForce;
 
+			//if (ProjectileOwner && HitActor == ProjectileOwner)
+			//{
+			//	Strength *= 0.3f; // now the owner will only get 30% damage and 30% impulse
+			//}
+
 			// Make the Charactor Fly
 			FVector FinalImpulse = Direction * Strength + FVector(0, 0, ExplosionUpwardBias);
 
@@ -280,4 +285,16 @@ void ABD_Projectile::ActivateBomb()
 {
 	bIsActivated = true;
 	// Can add more relative logics
+}
+
+void ABD_Projectile::TriggerEarlyDetonation()
+{
+	if (bHasExploded) return;
+
+	if (!bIsActivated)
+	{
+		ActivateBomb();
+		ExplosionDelayTime = TimeElapsed + 0.5f;
+		return;
+	}
 }
