@@ -31,6 +31,9 @@ void ABD_Projectile::BeginPlay()
 		RootPrim->SetCollisionObjectType(ECC_PhysicsBody);
 		RootPrim->SetSimulatePhysics(false);
 		RootPrim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		// Block other bombs
+		RootPrim->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Block);
 	}
 }
 
@@ -176,7 +179,7 @@ void ABD_Projectile::ExecuteExplosion() {
 		for (auto& Result : Overlaps)
 		{
 			AActor* HitActor = Result.GetActor();
-			if (!HitActor) continue;
+			if (!HitActor || HitActor == this) continue;
 
 			// Breakable tag check
 			if (HitActor->ActorHasTag(FName("Breakable")))
@@ -201,13 +204,19 @@ void ABD_Projectile::ExecuteExplosion() {
 			// Make the Charactor Fly
 			FVector FinalImpulse = Direction * Strength + FVector(0, 0, ExplosionUpwardBias);
 
-			// Apply Force to Charactors
-			ACharacter* Character = Cast<ACharacter>(HitActor);
-			if (Character)
+
+			if (HitActor->GetClass()->ImplementsInterface(UBD_PhysicsInteractable::StaticClass()))
 			{
-				Character->LaunchCharacter(FinalImpulse, true, true);
+				// If it is a custom bomb
+				IBD_PhysicsInteractable::Execute_ApplyCustomImpulse(HitActor, FinalImpulse, false);
 			}
-			else  {
+			else if (ACharacter *Character = Cast<ACharacter>(HitActor))
+			{
+				// Apply Force to Charactors
+				Character->LaunchCharacter(FinalImpulse, true, true);
+			} 
+			else 
+			{
 				// Only for Objects with Simulate Physics Enabled
 				USceneComponent* Root = HitActor->GetRootComponent();
 				if (Root)
