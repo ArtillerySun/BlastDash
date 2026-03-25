@@ -10,7 +10,7 @@
 // Sets default values
 ABD_Projectile::ABD_Projectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	TimeElapsed = 0.0f;
@@ -166,11 +166,19 @@ void ABD_Projectile::ExecuteExplosion() {
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActors(IgnoreActors);
 
-	bool bHasHurtSomething = GetWorld()->OverlapMultiByChannel(
+	// Search several channels
+	FCollisionObjectQueryParams ObjectParams;
+	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+	ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjectParams.AddObjectTypesToQuery(ECC_Pawn);
+	ObjectParams.AddObjectTypesToQuery(ECC_Destructible);
+
+	bool bHasHurtSomething = GetWorld()->OverlapMultiByObjectType(
 		Overlaps,
 		GetActorLocation(),
 		FQuat::Identity,
-		ECC_WorldDynamic,
+		ObjectParams,
 		Sphere,
 		QueryParams
 	);
@@ -215,12 +223,12 @@ void ABD_Projectile::ExecuteExplosion() {
 				// If it is a custom bomb
 				IBD_PhysicsInteractable::Execute_ApplyCustomImpulse(HitActor, FinalImpulse, false);
 			}
-			else if (ACharacter *Character = Cast<ACharacter>(HitActor))
+			else if (ACharacter* Character = Cast<ACharacter>(HitActor))
 			{
 				// Apply Force to Charactors
 				Character->LaunchCharacter(FinalImpulse, true, true);
-			} 
-			else 
+			}
+			else
 			{
 				// Only for Objects with Simulate Physics Enabled
 				USceneComponent* Root = HitActor->GetRootComponent();
@@ -250,7 +258,7 @@ void ABD_Projectile::ExecuteExplosion() {
 			ECC_WorldDynamic
 		);
 	}
-	
+
 	// Debug Information for Now
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 2.0f, 0, 1.5f);
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius / 2.0, 32, FColor::Yellow, false, 2.0f, 0, 1.5f);
@@ -294,7 +302,7 @@ void ABD_Projectile::TriggerEarlyDetonation()
 	if (!bIsActivated)
 	{
 		ActivateBomb();
-		ExplosionDelayTime = TimeElapsed + 0.5f;
+		ExplosionDelayTime = TimeElapsed + MinDetonationAge;
 		return;
 	}
 }
