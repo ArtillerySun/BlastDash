@@ -306,7 +306,7 @@ void ABD_Projectile::TriggerEarlyDetonation()
 	if (!bIsActivated)
 	{
 		ActivateBomb();
-		ExplosionDelayTime = TimeElapsed + MinDetonationAge;
-		return;
 	}
+	ExplosionDelayTime = TimeElapsed + MinDetonationAge;
+	return;
 }
