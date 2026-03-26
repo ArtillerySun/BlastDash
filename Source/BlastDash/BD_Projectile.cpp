@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/DamageEvents.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 ABD_Projectile::ABD_Projectile()
@@ -19,8 +20,10 @@ ABD_Projectile::ABD_Projectile()
 	ExplosionDelayTime = 3.0f;
 	ExplosionRadius = 400.0f;
 	BaseDamage = 50.0f;
-}
 
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+	StimuliSource->bAutoRegister = true;
+}
 // Called when the game starts or when spawned
 void ABD_Projectile::BeginPlay()
 {
@@ -35,7 +38,39 @@ void ABD_Projectile::BeginPlay()
 		// Block other bombs
 		RootPrim->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Block);
 	}
+
+	if (StimuliSource)
+	{
+		StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+		StimuliSource->RegisterWithPerceptionSystem();
+	}
 }
+
+void ABD_Projectile::SetHeld(bool bHeld)
+{
+	bIsHeld = bHeld;
+
+	if (bIsHeld)
+	{
+		// Stop hovering immediately
+		bIsHovering = false;
+
+		// Reset velocity
+		Velocity = FVector::ZeroVector;
+
+		// Broadcast pickup event
+		OnBombPickedUp.Broadcast();
+	}
+	else
+	{
+		if (StimuliSource)
+		{
+			StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+			StimuliSource->RegisterWithPerceptionSystem();
+		}
+	}
+}
+
 
 void ABD_Projectile::SetHoverState(bool bHover, FVector AnchorLoc)
 {

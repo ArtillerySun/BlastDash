@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BD_PhysicsInteractable.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "BD_Projectile.generated.h"
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBombPickedUpSignature);
 
@@ -54,6 +56,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	FVector Gravity = FVector(0.f, 0.f, -980.f); // Gravity
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "BlastDash|State")
+	bool bIsHeld = false;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
 	void OnExplosionEffects();
@@ -68,6 +72,9 @@ protected:
 
 	float TimeElapsed = 0.0f;
 	bool bHasExploded = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 public:	
 
@@ -92,6 +99,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
 
+	UFUNCTION(BlueprintCallable, Category = "BlastDash|State")
+	void SetHeld(bool bHeld);
+
+	UFUNCTION(BlueprintPure, Category = "BlastDash|State")
+	bool IsHeld() const { return bIsHeld; }
 	// Premature detonation
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void TriggerEarlyDetonation();
