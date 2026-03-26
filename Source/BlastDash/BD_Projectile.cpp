@@ -224,33 +224,25 @@ void ABD_Projectile::ExecuteExplosion() {
 			AActor* HitActor = Result.GetActor();
 			if (!HitActor || HitActor == this) continue;
 
-			// Breakable tag check
-			if (HitActor->ActorHasTag(FName("Breakable")))
-			{
-				UGameplayStatics::ApplyDamage(
-					HitActor,
-					BaseDamage,
-					GetInstigatorController(),
-					this,
-					UDamageType::StaticClass()
-				);
-			}
-
-			// 1. Physics Knockback
 			FVector Direction = HitActor->GetActorLocation() - GetActorLocation();
 			float Distance = Direction.Size();
 			Direction.Normalize();
 
-			// Calculate Strength Decay
-			float Strength = (1.0f - FMath::Clamp(Distance / ExplosionRadius, 0.f, 1.f)) * ExplosionForce;
+			float Decay = 1.0f - FMath::Clamp(Distance / ExplosionRadius, 0.f, 1.f);
 
-			//if (ProjectileOwner && HitActor == ProjectileOwner)
-			//{
-			//	Strength *= 0.3f; // now the owner will only get 30% damage and 30% impulse
-			//}
+			float DamageToApply = Decay * BaseDamage;
+			float StrengthToApply = Decay * ExplosionForce;
+
+			if (ProjectileOwner && HitActor == ProjectileOwner)
+			{
+				DamageToApply *= 0.1f;
+				StrengthToApply *= 0.5f;
+			}
+
+			UGameplayStatics::ApplyDamage(HitActor, DamageToApply, GetInstigatorController(), this, UDamageType::StaticClass());
 
 			// Make the Charactor Fly
-			FVector FinalImpulse = Direction * Strength + FVector(0, 0, ExplosionUpwardBias);
+			FVector FinalImpulse = Direction * StrengthToApply + FVector(0, 0, ExplosionUpwardBias);
 
 
 			if (HitActor->GetClass()->ImplementsInterface(UBD_PhysicsInteractable::StaticClass()))
@@ -263,35 +255,12 @@ void ABD_Projectile::ExecuteExplosion() {
 				// Apply Force to Charactors
 				Character->LaunchCharacter(FinalImpulse, true, true);
 			}
-			else
+			else if (UPrimitiveComponent* PhysComp = Cast<UPrimitiveComponent>(HitActor->GetRootComponent()))
 			{
-				// Only for Objects with Simulate Physics Enabled
-				USceneComponent* Root = HitActor->GetRootComponent();
-				if (Root)
-				{
-					UPrimitiveComponent* PhysComp = Cast<UPrimitiveComponent>(Root);
-					if (PhysComp && PhysComp->IsSimulatingPhysics())
-					{
-						PhysComp->AddImpulse(FinalImpulse, NAME_None, true);
-					}
-				}
+				// Only for Physics Objects
+				PhysComp->AddRadialImpulse(GetActorLocation(), ExplosionRadius, StrengthToApply, ERadialImpulseFalloff::RIF_Linear, true);
 			}
 		}
-
-		// 2. Deal with Damage
-		FVector DamageOrigin = GetActorLocation() + FVector(0.f, 0.f, 20.f);
-		UGameplayStatics::ApplyRadialDamage(
-			this,
-			BaseDamage,
-			DamageOrigin,
-			ExplosionRadius,
-			UDamageType::StaticClass(),
-			IgnoreActors,
-			this,
-			GetInstigatorController(),
-			false,
-			ECC_WorldDynamic
-		);
 	}
 
 	// Debug Information for Now

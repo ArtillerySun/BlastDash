@@ -109,7 +109,7 @@ public:
 	void TriggerEarlyDetonation();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
-	float MinDetonationAge = 0.3f; // In second
+	float MinDetonationAge = 0.5f; // In second
 
 	// Track the last player who picked up the bomb
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
