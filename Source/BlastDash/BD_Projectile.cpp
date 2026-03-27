@@ -182,6 +182,8 @@ void ABD_Projectile::HandleCollision(const FHitResult& Hit) {
 }
 
 void ABD_Projectile::ExecuteExplosion() {
+	
+	OnExplosion();
 
 	SetActorTickEnabled(false);
 
