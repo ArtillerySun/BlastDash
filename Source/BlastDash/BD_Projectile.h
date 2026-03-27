@@ -60,6 +60,9 @@ protected:
 	bool bIsHeld = false;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
+	void OnExplosion();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
 	void OnExplosionEffects();
 
 	UPROPERTY(BlueprintAssignable, Category = "BlastDash|Events")
