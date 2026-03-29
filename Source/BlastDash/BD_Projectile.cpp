@@ -266,8 +266,8 @@ void ABD_Projectile::ExecuteExplosion() {
 	}
 
 	// Debug Information for Now
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 2.0f, 0, 1.5f);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius / 2.0, 32, FColor::Yellow, false, 2.0f, 0, 1.5f);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 2.0f, 0, 1.5f);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius / 2.0, 32, FColor::Yellow, false, 2.0f, 0, 1.5f);
 
 	OnSelfDestroy();
 }
