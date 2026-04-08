@@ -285,11 +285,11 @@ void ABD_Projectile::ApplyCustomImpulse_Implementation(FVector Impulse, bool bVe
 
 	if (bVelocityChange)
 	{
-		Velocity = Impulse;
+		Velocity += Impulse;
 	}
 	else
 	{
-		Velocity = Impulse / FMath::Max(Mass, 0.1f);
+		Velocity += Impulse / FMath::Max(Mass, 0.1f);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Velocity AFTER = %s"), *Velocity.ToString());
