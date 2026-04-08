@@ -21,8 +21,6 @@ protected:
 	virtual void BeginPlay() override;
 	void HandleCollision(const FHitResult& Hit);
 
-	void ExecuteExplosion();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Physics")
 	float ExplosionRadius = 200.f;
 
@@ -83,6 +81,9 @@ public:
 
 	ABD_Projectile();
 	void OnSelfDestroy();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "BlastDash|Events")
+	void ExecuteExplosion();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

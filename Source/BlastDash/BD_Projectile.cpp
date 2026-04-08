@@ -181,7 +181,7 @@ void ABD_Projectile::HandleCollision(const FHitResult& Hit) {
 	SetActorLocation(Hit.Location + Normal * 2.0f);
 }
 
-void ABD_Projectile::ExecuteExplosion() {
+void ABD_Projectile::ExecuteExplosion_Implementation() {
 	
 	OnExplosion();
 
