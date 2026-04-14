@@ -46,7 +46,7 @@ void ABD_Projectile::BeginPlay()
 	}
 }
 
-void ABD_Projectile::SetHeld(bool bHeld)
+void ABD_Projectile::SetHeld_Implementation(bool bHeld)
 {
 	bIsHeld = bHeld;
 
@@ -170,6 +170,8 @@ void ABD_Projectile::Tick(float DeltaTime)
 }
 
 void ABD_Projectile::HandleCollision(const FHitResult& Hit) {
+
+	OnProjectileImpact(Hit);
 	// V_new = V_old - 2 * (V_old \dot Normal) * Normal
 	FVector Normal = Hit.Normal;
 	Velocity = Velocity - 2 * FVector::DotProduct(Velocity, Normal) * Normal;
@@ -301,7 +303,7 @@ void ABD_Projectile::ActivateBomb()
 	// Can add more relative logics
 }
 
-void ABD_Projectile::TriggerEarlyDetonation()
+void ABD_Projectile::TriggerEarlyDetonation_Implementation()
 {
 	if (bHasExploded) return;
 

@@ -66,8 +66,13 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "BlastDash|Events")
 	FOnBombPickedUpSignature OnBombPickedUp;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "BlastDash|Events")
+	void OnProjectileImpact(const FHitResult& Hit);
+
 	// Hovering
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
 	bool bIsHovering = false;
+
 	FVector HoverAnchorLocation;
 	float HoverSineTime = 0.0f;
 
@@ -103,13 +108,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
 	void SetExplosionDelayTime(float NewExplosionDelayTime = 3.0f);
 
-	UFUNCTION(BlueprintCallable, Category = "BlastDash|State")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "BlastDash|State")
 	void SetHeld(bool bHeld);
 
 	UFUNCTION(BlueprintPure, Category = "BlastDash|State")
 	bool IsHeld() const { return bIsHeld; }
 	// Premature detonation
-	UFUNCTION(BlueprintCallable, Category = "BlastDash|Logic")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "BlastDash|Logic")
 	void TriggerEarlyDetonation();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlastDash|Logic")
